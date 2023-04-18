@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unlimited-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unlimited
+  template:
+    metadata:
+      labels:
+        app: unlimited
+    spec:
+      containers:
+        - name: unlimited
+          image: pythonfordevops/unlimited:my-microservice
+          ports:
+            - containerPort: 5000
+          env:
+            - name: FLUENTD_HOST
+              value: "192.168.49.2" # Replace with the IP address of your Minikube host machine
+            - name: FLUENTD_PORT
+              value: "24224" # Port number to which Fluentd is listening
+        - name: fluentd
+          image: pythonfordevops/fluendtd:latest # Replace with the name and version of your Fluentd image
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: varlog
+          emptyDir: {}
+      imagePullSecrets:
+        - name: dockerhub-secret # Replace with the name of your Docker Hub secret
